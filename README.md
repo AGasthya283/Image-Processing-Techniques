@@ -46,26 +46,35 @@ real scrubbable video players, no local GUI or download step required.
 | 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
 | 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
 | 35 | Image Super-Resolution: Classical vs. Learned | `cv2.dnn_superres` (ESPCN, FSRCNN) vs. bicubic, cross-checked with notebook 20's MSE/SSIM plus PSNR — where the numbers and the eye test disagree, and why |
+| 36 | Text Detection with DB | `cv2.dnn_TextDetectionModel_DB`, upright vs. rotated text, straightening a detected line with notebook 18's perspective-warp technique |
+| 37 | Promptable Segmentation with MobileSAM | `onnxruntime` encoder/decoder pair, click-a-point segmentation, contrasted with notebook 22's unsupervised Watershed on the same `coins.jpg` |
+| 38 | Monocular Depth Estimation vs. Classical Stereo | Depth Anything V2 Small (single photo, `onnxruntime`) graded against the same real ground truth (`aloeGT.png`) notebook 32 used for `StereoSGBM` — surprisingly close on this scene |
+| 39 | GPU Acceleration with cv2.UMat | The Transparent API's automatic OpenCL dispatch, honestly benchmarked — single op vs. chained pipeline, across image sizes, on real hardware |
+| 40 | Modern Learned Feature Matching: DISK + LightGlue | `onnxruntime`, a fused DISK+LightGlue ONNX pipeline, localizing the exact same object as notebook 27's classical SIFT/RANSAC on the same photo pair |
 
-Notebooks 27-35 were added after the original 26-notebook rewrite, filling
+Notebooks 27-40 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
-inpainting, super-resolution) — see the "Develop" section for the scripts
-that build them.
+inpainting, super-resolution, text detection, promptable segmentation,
+monocular depth, GPU acceleration, modern learned feature matching) — see the
+"Develop" section for the scripts that build them.
 
-**Not added: a notebook on OpenCV 5's new learned feature matchers (ALIKED /
-DISK / LightGlueMatcher).** The Python API exists in
+**Notebook 40 uses `onnxruntime`, not `cv2.ALIKED`/`cv2.LightGlueMatcher`.**
+OpenCV 5.x's Python API for those classes exists in
 `opencv-contrib-python-headless==5.0.0.93` and is confirmed working, but the
-actual pretrained ONNX weights those classes need (`aliked-n16rot-top1k-640.onnx`,
-`aliked_lightglue.onnx`) aren't published anywhere publicly redistributable
-yet as of this writing — not in `opencv_zoo`, not in `opencv_zoo`'s Hugging
-Face org, and the one place they're referenced by filename
-(`opencv/opencv`'s own `modules/features/test/test_aliked_lightglue.cpp`,
-via `cvtest::findDataFile`) resolves against a private/internal
-`opencv_extra` test-data path that isn't in the public `opencv_extra` repo.
-Rather than substitute an unrelated model and call it something it isn't,
-this one is left out until the weights are actually published somewhere
-citable.
+actual pretrained ONNX weights those *specific* classes expect
+(`aliked-n16rot-top1k-640.onnx`, `aliked_lightglue.onnx`) still aren't
+published anywhere publicly redistributable as of this writing — not in
+`opencv_zoo`, not in `opencv_zoo`'s Hugging Face org, and the one place
+they're referenced by filename (`opencv/opencv`'s own
+`modules/features/test/test_aliked_lightglue.cpp`, via
+`cvtest::findDataFile`) resolves against a private/internal `opencv_extra`
+test-data path that isn't in the public `opencv_extra` repo — this is an
+active [GSoC 2026 project](https://forum.opencv.org/t/gsoc-2026-intro-neural-feature-matching-aliked-lightglue/24410),
+not yet shipped. Notebook 40 gets the same technique a different way instead
+of leaving it out: DISK + LightGlue via `onnxruntime` directly, same pattern
+as notebooks 37 (MobileSAM) and 38 (Depth Anything) — see that notebook's
+assets note for the full license trail.
 
 Every lesson closes with a short, plainly-worded section of a few concrete,
 runnable extensions of that notebook's technique — not just a summary of
@@ -179,6 +188,15 @@ scattered loose at the repo root:
   — [fannymonori/TF-ESPCN](https://github.com/fannymonori/TF-ESPCN) and
   [Saafke/FSRCNN_Tensorflow](https://github.com/Saafke/FSRCNN_Tensorflow),
   both Apache 2.0 and genuinely tiny (~100KB / ~42KB).
+  `assets/models/text_detection_en_ppocrv3_2023may.onnx` (notebook 36) is
+  PP-OCRv3's text detector, also from
+  [opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/text_detection_ppocr)
+  (Apache 2.0, 2.4MB) — used instead of `cv2.dnn_TextDetectionModel`'s other
+  supported architecture, EAST, because the EAST weights OpenCV's own sample
+  code points learners to are a Dropbox link and a Google Drive link, neither
+  scriptably fetchable nor as clearly licensed as everything else this repo
+  bundles. `assets/images/imageTextN.png` / `imageTextR.png` (real book-page
+  text, upright and rotated) are OpenCV's own official samples too.
   `assets/models/inpainting_lama_2025jan.onnx` (notebook 34) is LaMa, from
   [opencv/inpainting_lama](https://huggingface.co/opencv/inpainting_lama) on
   Hugging Face (Apache 2.0, originally [advimman/lama](https://github.com/advimman/lama)).
@@ -186,6 +204,34 @@ scattered loose at the repo root:
   else is under 10MB); no smaller quantized export was available from
   OpenCV's own distribution at the time of writing. Flagged here rather than
   quietly bundled, since it's a real outlier in size.
+  `assets/models/mobilesam_encoder.onnx` / `mobilesam_decoder.onnx`
+  (notebook 37) are MobileSAM's split ONNX export, from
+  [Acly/MobileSAM](https://huggingface.co/Acly/MobileSAM) on Hugging Face
+  (MIT) — traced to the official
+  [ChaoningZhang/MobileSAM](https://github.com/ChaoningZhang/MobileSAM)
+  (Apache 2.0), weights also mirrored at
+  [dhkim2810/MobileSAM](https://huggingface.co/dhkim2810/MobileSAM). Not in
+  `opencv_zoo` (no SAM-family model there yet) and loaded with
+  `onnxruntime` directly rather than `cv2.dnn` — see the note in that
+  notebook.
+  `assets/models/depth_anything_v2_small.onnx` (notebook 38) is
+  [depth-anything/Depth-Anything-V2-Small](https://huggingface.co/depth-anything/Depth-Anything-V2-Small)
+  (Apache 2.0 — the larger Base/Large checkpoints in the same family are
+  CC-BY-NC-4.0 and were deliberately not used here), exported to ONNX by
+  [onnx-community](https://huggingface.co/onnx-community/depth-anything-v2-small)
+  (also Apache 2.0), the `model_quantized.onnx` variant (~27MB). Also
+  loaded with `onnxruntime` directly, same reason as MobileSAM above.
+  `assets/models/disk_lightglue_pipeline.onnx` (notebook 40) fuses DISK
+  feature extraction and LightGlue matching, from
+  [fabio-sim/LightGlue-ONNX](https://github.com/fabio-sim/LightGlue-ONNX)
+  (Apache 2.0), release
+  [v2.0](https://github.com/fabio-sim/LightGlue-ONNX/releases/tag/v2.0)
+  (~50MB). Traced to the official
+  [cvg/LightGlue](https://github.com/cvg/LightGlue) (Apache 2.0) — whose own
+  README confirms DISK carries the same license (unlike the other extractor
+  it supports, SuperPoint, which is restrictive and wasn't used here). See
+  that notebook for why this bypasses OpenCV 5's still-unshipped native
+  `cv2.ALIKED`/`cv2.LightGlueMatcher` classes.
 - **Procedurally generated** — where no suitable real sample existed:
   the contour-sorting shape set (`4star`, `bunchofshapes`, `hand`, `house`,
   `shapestomatch`), the Hough-circle scene, and the skewed "scanned
@@ -287,6 +333,21 @@ JUPYTER_DATA_DIR="$(pwd)/.venv5x/share/jupyter" .venv5x/bin/python scripts/build
 
 # Rebuild + re-execute notebook 35 (super-resolution)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb35.py
+
+# Rebuild + re-execute notebook 36 (text detection)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb36.py
+
+# Rebuild + re-execute notebook 37 (MobileSAM promptable segmentation)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb37.py
+
+# Rebuild + re-execute notebook 38 (monocular depth vs. stereo)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb38.py
+
+# Rebuild + re-execute notebook 39 (cv2.UMat / OpenCL benchmark)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb39.py
+
+# Rebuild + re-execute notebook 40 (DISK + LightGlue feature matching)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb40.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
