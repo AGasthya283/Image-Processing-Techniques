@@ -41,11 +41,29 @@ real scrubbable video players, no local GUI or download step required.
 | 28 | Image Stitching & Panoramas | `cv2.Stitcher`, bundle adjustment/seam finding/exposure compensation, built on notebook 27's matching pipeline |
 | 29 | QR Code & Barcode Detection | `cv2.QRCodeDetector`, `cv2.barcode.BarcodeDetector`, generate-then-decode round trip |
 | 30 | Modern Face Detection with YuNet (DNN) | `cv2.FaceDetectorYN`, head-to-head against notebook 16's Haar cascade — landmarks, rotation robustness, speed |
+| 31 | Camera Calibration & Lens Undistortion | `cv2.calibrateCamera`, chessboard corner detection across 13 photos, `cv2.undistort` |
+| 32 | Stereo Vision & Disparity Maps | `cv2.StereoBM` / `cv2.StereoSGBM`, disparity-to-depth relationship, checked against real ground truth |
+| 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
+| 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
 
-Notebooks 27-30 were added after the original 26-notebook rewrite, filling
+Notebooks 27-34 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
-detection, DNN-based detection) — see the "Develop" section for the scripts
-that build them.
+detection, DNN-based detection, camera calibration, stereo vision, generative
+inpainting) — see the "Develop" section for the scripts that build them.
+
+**Not added: a notebook on OpenCV 5's new learned feature matchers (ALIKED /
+DISK / LightGlueMatcher).** The Python API exists in
+`opencv-contrib-python-headless==5.0.0.93` and is confirmed working, but the
+actual pretrained ONNX weights those classes need (`aliked-n16rot-top1k-640.onnx`,
+`aliked_lightglue.onnx`) aren't published anywhere publicly redistributable
+yet as of this writing — not in `opencv_zoo`, not in `opencv_zoo`'s Hugging
+Face org, and the one place they're referenced by filename
+(`opencv/opencv`'s own `modules/features/test/test_aliked_lightglue.cpp`,
+via `cvtest::findDataFile`) resolves against a private/internal
+`opencv_extra` test-data path that isn't in the public `opencv_extra` repo.
+Rather than substitute an unrelated model and call it something it isn't,
+this one is left out until the weights are actually published somewhere
+citable.
 
 Every lesson closes with a short, plainly-worded section of a few concrete,
 runnable extensions of that notebook's technique — not just a summary of
@@ -75,9 +93,29 @@ pip install -r requirements.txt
 jupyter notebook
 ```
 
-That's it — `assets/images/`, `assets/videos/`, and `assets/haarcascades/`
-ship with the repo, so nothing needs to be downloaded before running a
-notebook top to bottom.
+That's it — `assets/images/`, `assets/videos/`, `assets/haarcascades/`, and
+`assets/models/` ship with the repo, so nothing needs to be downloaded
+before running a notebook top to bottom.
+
+### OpenCV 5.x notebooks
+
+Notebook 34 needs a **second, separate environment** — it's the only one in
+this repo built against `opencv-contrib-python-headless==5.0.0.93` instead
+of the `4.10.0.84` every other notebook is pinned to. This isn't a
+convenience choice: its LaMa model uses an ONNX op (`DequantizeLinear`) that
+OpenCV 4.x's DNN importer cannot parse at all, confirmed by actually running
+it, not just by reading OpenCV's docs. Setting it up:
+
+```bash
+python3 -m venv .venv5x
+.venv5x/bin/pip install -r requirements-5x.txt
+.venv5x/bin/python3 -m ipykernel install --prefix="$(pwd)/.venv5x" \
+    --name python3-cv5 --display-name "Python 3 (OpenCV 5.x)"
+.venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
+```
+
+Every other notebook in this repo (1-33) stays on the original `.venv` /
+`requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `opencv-python-headless` is pinned in `requirements.txt` to a version known
 to include `cv2.CascadeClassifier` — the 5.0.0 headless wheel available at
@@ -114,13 +152,27 @@ scattered loose at the repo root:
   the copies that circulate in tutorials trace back to an old forum post
   with no formal license — so notebook 17's vehicle detection uses
   background subtraction instead (see the note in that notebook).
-  `assets/haarcascades/face_detection_yunet_2023mar.onnx` (notebook 30) is the
+  `assets/models/face_detection_yunet_2023mar.onnx` (notebook 30) is the
   YuNet DNN face detector from OpenCV's own model zoo
   ([opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet),
   MIT-licensed, own `LICENSE` file in that directory) — the fixed-input-shape
   build, chosen specifically because it works with this repo's pinned
   OpenCV 4.x DNN module (the newer dynamic-shape export in the same
   directory targets OpenCV 5.x's ONNX Runtime engine instead).
+  `assets/models/object_detection_yolox_2022nov_int8.onnx` (notebook 33) is
+  YOLOX-s, also from
+  [opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/object_detection_yolox)
+  (Apache 2.0) — the int8-quantized export (~9MB vs. ~36MB full precision),
+  chosen over the better-known Ultralytics YOLO releases specifically
+  because those are AGPL-3.0, a copyleft license that doesn't fit a repo
+  meant to be freely reused.
+  `assets/models/inpainting_lama_2025jan.onnx` (notebook 34) is LaMa, from
+  [opencv/inpainting_lama](https://huggingface.co/opencv/inpainting_lama) on
+  Hugging Face (Apache 2.0, originally [advimman/lama](https://github.com/advimman/lama)).
+  **This one is ~92MB — by far the largest asset in this repo** (everything
+  else is under 10MB); no smaller quantized export was available from
+  OpenCV's own distribution at the time of writing. Flagged here rather than
+  quietly bundled, since it's a real outlier in size.
 - **Procedurally generated** — where no suitable real sample existed:
   the contour-sorting shape set (`4star`, `bunchofshapes`, `hand`, `house`,
   `shapestomatch`), the Hough-circle scene, and the skewed "scanned
@@ -146,6 +198,13 @@ scattered loose at the repo root:
   LICENSE file — so these are synthetically split from one real photo
   instead, which is still enough baseline for `cv2.Stitcher` to do real
   matching, warping, and blending.
+- **`assets/images/calib/left01-14.jpg` / `right01-14.jpg`** (notebooks 31, 32)
+  — OpenCV's own official calibration sample photos, 13 shots of the same
+  checkerboard from a left and a right camera. The exact dataset OpenCV's
+  own calibration and stereo tutorials use.
+- **`assets/images/aloeL.jpg` / `aloeR.jpg` / `aloeGT.png`** (notebook 32) —
+  OpenCV's own official stereo sample: a real rectified stereo pair with a
+  genuine, independently-measured ground-truth disparity map.
 - **Notebook 29's QR code and barcode** aren't bundled assets at all — the
   notebook generates them on the fly with `qrcode` / `python-barcode` (two
   new dependencies, used only there) and decodes them right back, so it's
@@ -200,6 +259,18 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_not
 
 # Rebuild + re-execute notebooks 27-29 (built from scratch, not edited from course content)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_new_notebooks.py
+
+# Rebuild + re-execute notebook 30 (YuNet)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb30.py
+
+# Rebuild + re-execute notebooks 31-32 (calibration, stereo)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb31_32.py
+
+# Rebuild + re-execute notebook 33 (YOLOX object detection)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb33.py
+
+# Rebuild + re-execute notebook 34 (LaMa inpainting) — needs .venv5x, not .venv
+JUPYTER_DATA_DIR="$(pwd)/.venv5x/share/jupyter" .venv5x/bin/python scripts/build_nb34.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
