@@ -1,11 +1,13 @@
 # Image-Processing-Techniques
 Image Processing using OpenCV
 
-A 26-notebook walkthrough of classical computer vision with OpenCV — from
-loading your first image to background subtraction, optical flow, and object
-tracking. Every notebook runs top to bottom and renders its results inline:
-static outputs as embedded plots, motion outputs as autoplaying GIFs *and*
-real scrubbable video players, no local GUI or download step required.
+A 40-notebook walkthrough of computer vision with OpenCV — from loading your
+first image through classical CV (background subtraction, optical flow,
+object tracking) to modern DNN-based techniques (YOLOX, LaMa, MobileSAM,
+DISK + LightGlue) run via `cv2.dnn` and `onnxruntime`. Every notebook runs
+top to bottom and renders its results inline: static outputs as embedded
+plots, motion outputs as autoplaying GIFs *and* real scrubbable video
+players, no local GUI or download step required.
 
 ## What's here
 
@@ -125,8 +127,8 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33, 35) stays on the original `.venv` /
-`requirements.txt` — only open notebook 34 with `.venv5x`.
+Every other notebook in this repo (1-33, 35-40) stays on the original
+`.venv` / `requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
 "contrib" wheel, not the plain `opencv-python-headless` this repo used until
