@@ -40,10 +40,12 @@ real scrubbable video players, no local GUI or download step required.
 | 27 | Feature Detection & Matching | SIFT/ORB/AKAZE, BFMatcher + Lowe's ratio test, RANSAC homography, object localization |
 | 28 | Image Stitching & Panoramas | `cv2.Stitcher`, bundle adjustment/seam finding/exposure compensation, built on notebook 27's matching pipeline |
 | 29 | QR Code & Barcode Detection | `cv2.QRCodeDetector`, `cv2.barcode.BarcodeDetector`, generate-then-decode round trip |
+| 30 | Modern Face Detection with YuNet (DNN) | `cv2.FaceDetectorYN`, head-to-head against notebook 16's Haar cascade — landmarks, rotation robustness, speed |
 
-Notebooks 27-29 were added after the original 26-notebook rewrite, filling
+Notebooks 27-30 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
-detection) — see the "Develop" section for the script that builds them.
+detection, DNN-based detection) — see the "Develop" section for the scripts
+that build them.
 
 Every lesson closes with a short, plainly-worded section of a few concrete,
 runnable extensions of that notebook's technique — not just a summary of
@@ -79,7 +81,12 @@ notebook top to bottom.
 
 `opencv-python-headless` is pinned in `requirements.txt` to a version known
 to include `cv2.CascadeClassifier` — the 5.0.0 headless wheel available at
-the time of writing shipped without it.
+the time of writing shipped without it. This isn't a temporary packaging gap:
+[OpenCV's own 4→5 migration notes](https://github.com/opencv/opencv/wiki/OpenCV-4-to-5-migration)
+say Haar cascades moved to `opencv_contrib`'s `xobjdetect` module in 5.x, with
+DNN-based face detection recommended as the replacement — see notebook 30,
+which runs that replacement (`cv2.FaceDetectorYN` / YuNet) side by side with
+notebook 16's Haar cascade.
 
 ## A note on the sample assets
 
@@ -107,6 +114,13 @@ scattered loose at the repo root:
   the copies that circulate in tutorials trace back to an old forum post
   with no formal license — so notebook 17's vehicle detection uses
   background subtraction instead (see the note in that notebook).
+  `assets/haarcascades/face_detection_yunet_2023mar.onnx` (notebook 30) is the
+  YuNet DNN face detector from OpenCV's own model zoo
+  ([opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet),
+  MIT-licensed, own `LICENSE` file in that directory) — the fixed-input-shape
+  build, chosen specifically because it works with this repo's pinned
+  OpenCV 4.x DNN module (the newer dynamic-shape export in the same
+  directory targets OpenCV 5.x's ONNX Runtime engine instead).
 - **Procedurally generated** — where no suitable real sample existed:
   the contour-sorting shape set (`4star`, `bunchofshapes`, `hand`, `house`,
   `shapestomatch`), the Hough-circle scene, and the skewed "scanned
