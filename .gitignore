@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# Regenerated on every run and already embedded inline in the notebooks
+# (as base64 GIF/video output) — no need to commit the loose copies too.
+output.jpg
+output.png
+cars_output*
+car-detection_output.*
+car_tracking_cam_shift.*
+car_tracking_mean_shift.*
+dense_optical_flow_walking.*
+optical_flow_walking.*
+walking_output*
