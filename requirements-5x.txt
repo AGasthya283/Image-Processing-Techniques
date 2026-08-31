@@ -10,7 +10,7 @@
 #       --name python3-cv5 --display-name "Python 3 (OpenCV 5.x)"
 #
 # Why a second environment instead of upgrading requirements.txt for
-# everything: this repo's other 39 notebooks are verified against
+# everything: this repo's other 42 notebooks are verified against
 # opencv-python-headless==4.10.0.84, and OpenCV 5.x's DNN engine can't even
 # parse notebook 34's LaMa model (DequantizeLinear op unsupported in 4.x) —
 # confirmed empirically, not assumed. Splitting environments keeps the

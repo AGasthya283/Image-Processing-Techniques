@@ -1,7 +1,7 @@
 # Image-Processing-Techniques
 Image Processing using OpenCV
 
-A 40-notebook walkthrough of computer vision with OpenCV — from loading your
+A 43-notebook walkthrough of computer vision with OpenCV — from loading your
 first image through classical CV (background subtraction, optical flow,
 object tracking) to modern DNN-based techniques (YOLOX, LaMa, MobileSAM,
 DISK + LightGlue) run via `cv2.dnn` and `onnxruntime`. Every notebook runs
@@ -53,12 +53,16 @@ players, no local GUI or download step required.
 | 38 | Monocular Depth Estimation vs. Classical Stereo | Depth Anything V2 Small (single photo, `onnxruntime`) graded against the same real ground truth (`aloeGT.png`) notebook 32 used for `StereoSGBM` — surprisingly close on this scene |
 | 39 | GPU Acceleration with cv2.UMat | The Transparent API's automatic OpenCL dispatch, honestly benchmarked — single op vs. chained pipeline, across image sizes, on real hardware |
 | 40 | Modern Learned Feature Matching: DISK + LightGlue | `onnxruntime`, a fused DISK+LightGlue ONNX pipeline, localizing the exact same object as notebook 27's classical SIFT/RANSAC on the same photo pair |
+| 41 | Superpixel Segmentation: SLIC, SEEDS & LSC | `cv2.ximgproc`, no external model — tested directly against notebook 22's exact tuned Watershed pipeline on the same `coins.jpg`, including a real case where Watershed's threshold fails and superpixels don't |
+| 42 | Disparity Refinement: WLS & Guided Filters | `cv2.ximgproc`'s edge-aware filters densify notebook 32's raw `StereoSGBM` holes, graded against the same `aloeGT.png` ground truth for both density and accuracy |
+| 43 | Robust Estimation: RANSAC vs. USAC/MAGSAC++ | Same `cv2.findHomography` call, one argument changed — rerun on notebook 27's exact SIFT matches, identical accuracy at 20-70x less runtime on noisy data |
 
-Notebooks 27-40 were added after the original 26-notebook rewrite, filling
+Notebooks 27-43 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
 inpainting, super-resolution, text detection, promptable segmentation,
-monocular depth, GPU acceleration, modern learned feature matching) — see the
+monocular depth, GPU acceleration, modern learned feature matching,
+superpixel segmentation, disparity refinement, robust estimation) — see the
 "Develop" section for the scripts that build them.
 
 **Notebook 40 uses `onnxruntime`, not `cv2.ALIKED`/`cv2.LightGlueMatcher`.**
@@ -127,7 +131,7 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33, 35-40) stays on the original
+Every other notebook in this repo (1-33, 35-43) stays on the original
 `.venv` / `requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
@@ -350,6 +354,15 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb3
 
 # Rebuild + re-execute notebook 40 (DISK + LightGlue feature matching)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb40.py
+
+# Rebuild + re-execute notebook 41 (superpixel segmentation)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb41.py
+
+# Rebuild + re-execute notebook 42 (disparity refinement)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb42.py
+
+# Rebuild + re-execute notebook 43 (RANSAC vs. USAC/MAGSAC++)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb43.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
