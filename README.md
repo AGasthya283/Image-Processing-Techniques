@@ -45,11 +45,13 @@ real scrubbable video players, no local GUI or download step required.
 | 32 | Stereo Vision & Disparity Maps | `cv2.StereoBM` / `cv2.StereoSGBM`, disparity-to-depth relationship, checked against real ground truth |
 | 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
 | 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
+| 35 | Image Super-Resolution: Classical vs. Learned | `cv2.dnn_superres` (ESPCN, FSRCNN) vs. bicubic, cross-checked with notebook 20's MSE/SSIM plus PSNR — where the numbers and the eye test disagree, and why |
 
-Notebooks 27-34 were added after the original 26-notebook rewrite, filling
+Notebooks 27-35 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
-inpainting) — see the "Develop" section for the scripts that build them.
+inpainting, super-resolution) — see the "Develop" section for the scripts
+that build them.
 
 **Not added: a notebook on OpenCV 5's new learned feature matchers (ALIKED /
 DISK / LightGlueMatcher).** The Python API exists in
@@ -114,13 +116,17 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33) stays on the original `.venv` /
+Every other notebook in this repo (1-33, 35) stays on the original `.venv` /
 `requirements.txt` — only open notebook 34 with `.venv5x`.
 
-`opencv-python-headless` is pinned in `requirements.txt` to a version known
-to include `cv2.CascadeClassifier` — the 5.0.0 headless wheel available at
-the time of writing shipped without it. This isn't a temporary packaging gap:
-[OpenCV's own 4→5 migration notes](https://github.com/opencv/opencv/wiki/OpenCV-4-to-5-migration)
+`requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
+"contrib" wheel, not the plain `opencv-python-headless` this repo used until
+notebook 35 needed `cv2.dnn_superres` (contrib-only). Confirmed a safe,
+drop-in swap by re-executing every one of the other 32 main-`.venv`
+notebooks against it unchanged before switching. The `4.10.0.84` version
+itself is pinned because the `5.0.0` headless wheel available at the time of
+writing shipped without `cv2.CascadeClassifier` — not a temporary packaging
+gap: [OpenCV's own 4→5 migration notes](https://github.com/opencv/opencv/wiki/OpenCV-4-to-5-migration)
 say Haar cascades moved to `opencv_contrib`'s `xobjdetect` module in 5.x, with
 DNN-based face detection recommended as the replacement — see notebook 30,
 which runs that replacement (`cv2.FaceDetectorYN` / YuNet) side by side with
@@ -166,6 +172,13 @@ scattered loose at the repo root:
   chosen over the better-known Ultralytics YOLO releases specifically
   because those are AGPL-3.0, a copyleft license that doesn't fit a repo
   meant to be freely reused.
+  `assets/models/ESPCN_x4.pb` / `FSRCNN_x4.pb` (notebook 35) are official
+  OpenCV GSoC 2019 contributions, linked directly from
+  [opencv_contrib's own `dnn_superres`
+  README](https://github.com/opencv/opencv_contrib/tree/4.x/modules/dnn_superres)
+  — [fannymonori/TF-ESPCN](https://github.com/fannymonori/TF-ESPCN) and
+  [Saafke/FSRCNN_Tensorflow](https://github.com/Saafke/FSRCNN_Tensorflow),
+  both Apache 2.0 and genuinely tiny (~100KB / ~42KB).
   `assets/models/inpainting_lama_2025jan.onnx` (notebook 34) is LaMa, from
   [opencv/inpainting_lama](https://huggingface.co/opencv/inpainting_lama) on
   Hugging Face (Apache 2.0, originally [advimman/lama](https://github.com/advimman/lama)).
@@ -271,6 +284,9 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb3
 
 # Rebuild + re-execute notebook 34 (LaMa inpainting) — needs .venv5x, not .venv
 JUPYTER_DATA_DIR="$(pwd)/.venv5x/share/jupyter" .venv5x/bin/python scripts/build_nb34.py
+
+# Rebuild + re-execute notebook 35 (super-resolution)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb35.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out

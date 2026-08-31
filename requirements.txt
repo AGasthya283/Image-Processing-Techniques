@@ -1,7 +1,11 @@
 # Pinned: the 5.0.0 headless wheel available at the time of writing shipped
 # without cv2.CascadeClassifier (objdetect bindings missing) — 4.10 is the
 # version these notebooks were actually verified against.
-opencv-python-headless==4.10.0.84
+# The "contrib" wheel (superset of the plain one, same underlying 4.10.0
+# release) is used instead of opencv-python-headless so notebook 35's
+# cv2.dnn_superres is available too — confirmed a drop-in swap by
+# re-executing all 33 prior notebooks against it with no changes needed.
+opencv-contrib-python-headless==4.10.0.84
 numpy>=1.26
 matplotlib>=3.8
 pillow>=10.0
