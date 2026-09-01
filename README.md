@@ -1,7 +1,12 @@
 # Image-Processing-Techniques
 Image Processing using OpenCV
 
-A 43-notebook walkthrough of computer vision with OpenCV — from loading your
+[![Notebooks](https://img.shields.io/badge/notebooks-45-blue)](#whats-here)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](requirements.txt)
+[![OpenCV](https://img.shields.io/badge/opencv-4.10%20%7C%205.0-5C3EE8)](#opencv-5x-notebooks)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+A 45-notebook walkthrough of computer vision with OpenCV — from loading your
 first image through classical CV (background subtraction, optical flow,
 object tracking) to modern DNN-based techniques (YOLOX, LaMa, MobileSAM,
 DISK + LightGlue) run via `cv2.dnn` and `onnxruntime`. Every notebook runs
@@ -9,61 +14,66 @@ top to bottom and renders its results inline: static outputs as embedded
 plots, motion outputs as autoplaying GIFs *and* real scrubbable video
 players, no local GUI or download step required.
 
+![A sample of this repo's actual output — fruit-bowl basics, face detection, corner detection, QR decoding, pedestrian detection, shape drawing, promptable coin segmentation, monocular depth, stereo disparity, and superpixel segmentation](assets/banner.jpg)
+
 ## What's here
 
-| # | Notebook | Covers |
-|---|----------|--------|
-| 01 | Getting started with images | imread/imshow/imwrite, image shape |
-| 02 | Grayscaling in Images | `cvtColor` to grayscale |
-| 03 | Color Spaces | BGR channels, HSV |
-| 04 | Drawing on images | lines, rectangles, circles, polygons, text |
-| 05 | Transformations | translation, rotation, flipping |
-| 06 | Scaling, Resizing & Cropping | interpolation methods, image pyramids |
-| 07 | Arithmetic & Bitwise Operations | add/subtract, AND/OR/XOR/NOT, masking |
-| 08 | Convolutions, Blurring & Sharpening | kernels, denoising |
-| 09 | Thresholding & Binarization | global, adaptive, Otsu, scikit-image local |
-| 10 | Dilation, Erosion & Edge Detection | morphology, Canny, auto-Canny |
-| 11 | Contours | `findContours` retrieval modes & approximation |
-| 12 | Sorting & Matching Contours | moments, `approxPolyDP`, convex hull, `matchShapes` |
-| 13 | Line, Circle & Blob Detection | Hough lines/circles, `SimpleBlobDetector` |
-| 14 | Counting Circles & Template Matching | blob filtering, `matchTemplate` |
-| 15 | Finding Corners | Harris, `goodFeaturesToTrack` |
-| 16 | Face & Eye Detection | Haar cascades, webcam capture |
-| 17 | Vehicle & Pedestrian Detection | Haar cascade + background-subtraction detection on video |
-| 18 | Perspective Transforms | `getPerspectiveTransform`, document unwarping |
-| 19 | Histograms & K-Means Color Analysis | channel histograms, dominant-color clustering |
-| 20 | Comparing Images | MSE, structural similarity |
-| 21 | Filtering Colors | HSV color-range masking |
-| 22 | Watershed Segmentation | marker-based segmentation of touching objects |
-| 23 | Background Subtraction | MOG2, KNN, running-average foreground masks |
-| 24 | Motion Tracking | meanshift, CAMSHIFT |
-| 25 | Object Tracking with Optical Flow | Lucas-Kanade (sparse), Farneback (dense) |
-| 26 | Single Object Tracking by Color | HSV threshold + contour tracking |
-| 27 | Feature Detection & Matching | SIFT/ORB/AKAZE, BFMatcher + Lowe's ratio test, RANSAC homography, object localization |
-| 28 | Image Stitching & Panoramas | `cv2.Stitcher`, bundle adjustment/seam finding/exposure compensation, built on notebook 27's matching pipeline |
-| 29 | QR Code & Barcode Detection | `cv2.QRCodeDetector`, `cv2.barcode.BarcodeDetector`, generate-then-decode round trip |
-| 30 | Modern Face Detection with YuNet (DNN) | `cv2.FaceDetectorYN`, head-to-head against notebook 16's Haar cascade — landmarks, rotation robustness, speed |
-| 31 | Camera Calibration & Lens Undistortion | `cv2.calibrateCamera`, chessboard corner detection across 13 photos, `cv2.undistort` |
-| 32 | Stereo Vision & Disparity Maps | `cv2.StereoBM` / `cv2.StereoSGBM`, disparity-to-depth relationship, checked against real ground truth |
-| 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
-| 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
-| 35 | Image Super-Resolution: Classical vs. Learned | `cv2.dnn_superres` (ESPCN, FSRCNN) vs. bicubic, cross-checked with notebook 20's MSE/SSIM plus PSNR — where the numbers and the eye test disagree, and why |
-| 36 | Text Detection with DB | `cv2.dnn_TextDetectionModel_DB`, upright vs. rotated text, straightening a detected line with notebook 18's perspective-warp technique |
-| 37 | Promptable Segmentation with MobileSAM | `onnxruntime` encoder/decoder pair, click-a-point segmentation, contrasted with notebook 22's unsupervised Watershed on the same `coins.jpg` |
-| 38 | Monocular Depth Estimation vs. Classical Stereo | Depth Anything V2 Small (single photo, `onnxruntime`) graded against the same real ground truth (`aloeGT.png`) notebook 32 used for `StereoSGBM` — surprisingly close on this scene |
-| 39 | GPU Acceleration with cv2.UMat | The Transparent API's automatic OpenCL dispatch, honestly benchmarked — single op vs. chained pipeline, across image sizes, on real hardware |
-| 40 | Modern Learned Feature Matching: DISK + LightGlue | `onnxruntime`, a fused DISK+LightGlue ONNX pipeline, localizing the exact same object as notebook 27's classical SIFT/RANSAC on the same photo pair |
-| 41 | Superpixel Segmentation: SLIC, SEEDS & LSC | `cv2.ximgproc`, no external model — tested directly against notebook 22's exact tuned Watershed pipeline on the same `coins.jpg`, including a real case where Watershed's threshold fails and superpixels don't |
-| 42 | Disparity Refinement: WLS & Guided Filters | `cv2.ximgproc`'s edge-aware filters densify notebook 32's raw `StereoSGBM` holes, graded against the same `aloeGT.png` ground truth for both density and accuracy |
-| 43 | Robust Estimation: RANSAC vs. USAC/MAGSAC++ | Same `cv2.findHomography` call, one argument changed — rerun on notebook 27's exact SIFT matches, identical accuracy at 20-70x less runtime on noisy data |
+|  | # | Notebook | Covers |
+|---|---|----------|--------|
+| <img src="assets/thumbnails/nb01.jpg" width="120"> | 01 | Getting started with images | imread/imshow/imwrite, image shape |
+| <img src="assets/thumbnails/nb02.jpg" width="120"> | 02 | Grayscaling in Images | `cvtColor` to grayscale |
+| <img src="assets/thumbnails/nb03.jpg" width="120"> | 03 | Color Spaces | BGR channels, HSV |
+| <img src="assets/thumbnails/nb04.jpg" width="120"> | 04 | Drawing on images | lines, rectangles, circles, polygons, text |
+| <img src="assets/thumbnails/nb05.jpg" width="120"> | 05 | Transformations | translation, rotation, flipping |
+| <img src="assets/thumbnails/nb06.jpg" width="120"> | 06 | Scaling, Resizing & Cropping | interpolation methods, image pyramids |
+| <img src="assets/thumbnails/nb07.jpg" width="120"> | 07 | Arithmetic & Bitwise Operations | add/subtract, AND/OR/XOR/NOT, masking |
+| <img src="assets/thumbnails/nb08.jpg" width="120"> | 08 | Convolutions, Blurring & Sharpening | kernels, denoising |
+| <img src="assets/thumbnails/nb09.jpg" width="120"> | 09 | Thresholding & Binarization | global, adaptive, Otsu, scikit-image local |
+| <img src="assets/thumbnails/nb10.jpg" width="120"> | 10 | Dilation, Erosion & Edge Detection | morphology, Canny, auto-Canny |
+| <img src="assets/thumbnails/nb11.jpg" width="120"> | 11 | Contours | `findContours` retrieval modes & approximation |
+| <img src="assets/thumbnails/nb12.jpg" width="120"> | 12 | Sorting & Matching Contours | moments, `approxPolyDP`, convex hull, `matchShapes` |
+| <img src="assets/thumbnails/nb13.jpg" width="120"> | 13 | Line, Circle & Blob Detection | Hough lines/circles, `SimpleBlobDetector` |
+| <img src="assets/thumbnails/nb14.jpg" width="120"> | 14 | Counting Circles & Template Matching | blob filtering, `matchTemplate` |
+| <img src="assets/thumbnails/nb15.jpg" width="120"> | 15 | Finding Corners | Harris, `goodFeaturesToTrack` |
+| <img src="assets/thumbnails/nb16.jpg" width="120"> | 16 | Face & Eye Detection | Haar cascades, webcam capture |
+| <img src="assets/thumbnails/nb17.jpg" width="120"> | 17 | Vehicle & Pedestrian Detection | Haar cascade + background-subtraction detection on video |
+| <img src="assets/thumbnails/nb18.jpg" width="120"> | 18 | Perspective Transforms | `getPerspectiveTransform`, document unwarping |
+| <img src="assets/thumbnails/nb19.jpg" width="120"> | 19 | Histograms & K-Means Color Analysis | channel histograms, dominant-color clustering |
+| <img src="assets/thumbnails/nb20.jpg" width="120"> | 20 | Comparing Images | MSE, structural similarity |
+| <img src="assets/thumbnails/nb21.jpg" width="120"> | 21 | Filtering Colors | HSV color-range masking |
+| <img src="assets/thumbnails/nb22.jpg" width="120"> | 22 | Watershed Segmentation | marker-based segmentation of touching objects |
+| <img src="assets/thumbnails/nb23.jpg" width="120"> | 23 | Background Subtraction | MOG2, KNN, running-average foreground masks |
+| <img src="assets/thumbnails/nb24.jpg" width="120"> | 24 | Motion Tracking | meanshift, CAMSHIFT |
+| <img src="assets/thumbnails/nb25.jpg" width="120"> | 25 | Object Tracking with Optical Flow | Lucas-Kanade (sparse), Farneback (dense) |
+| <img src="assets/thumbnails/nb26.jpg" width="120"> | 26 | Single Object Tracking by Color | HSV threshold + contour tracking |
+| <img src="assets/thumbnails/nb27.jpg" width="120"> | 27 | Feature Detection & Matching | SIFT/ORB/AKAZE, BFMatcher + Lowe's ratio test, RANSAC homography, object localization |
+| <img src="assets/thumbnails/nb28.jpg" width="120"> | 28 | Image Stitching & Panoramas | `cv2.Stitcher`, bundle adjustment/seam finding/exposure compensation, built on notebook 27's matching pipeline |
+| <img src="assets/thumbnails/nb29.jpg" width="120"> | 29 | QR Code & Barcode Detection | `cv2.QRCodeDetector`, `cv2.barcode.BarcodeDetector`, generate-then-decode round trip |
+| <img src="assets/thumbnails/nb30.jpg" width="120"> | 30 | Modern Face Detection with YuNet (DNN) | `cv2.FaceDetectorYN`, head-to-head against notebook 16's Haar cascade — landmarks, rotation robustness, speed |
+| <img src="assets/thumbnails/nb31.jpg" width="120"> | 31 | Camera Calibration & Lens Undistortion | `cv2.calibrateCamera`, chessboard corner detection across 13 photos, `cv2.undistort` |
+| <img src="assets/thumbnails/nb32.jpg" width="120"> | 32 | Stereo Vision & Disparity Maps | `cv2.StereoBM` / `cv2.StereoSGBM`, disparity-to-depth relationship, checked against real ground truth |
+| <img src="assets/thumbnails/nb33.jpg" width="120"> | 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
+| <img src="assets/thumbnails/nb34.jpg" width="120"> | 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
+| <img src="assets/thumbnails/nb35.jpg" width="120"> | 35 | Image Super-Resolution: Classical vs. Learned | `cv2.dnn_superres` (ESPCN, FSRCNN) vs. bicubic, cross-checked with notebook 20's MSE/SSIM plus PSNR — where the numbers and the eye test disagree, and why |
+| <img src="assets/thumbnails/nb36.jpg" width="120"> | 36 | Text Detection with DB | `cv2.dnn_TextDetectionModel_DB`, upright vs. rotated text, straightening a detected line with notebook 18's perspective-warp technique |
+| <img src="assets/thumbnails/nb37.jpg" width="120"> | 37 | Promptable Segmentation with MobileSAM | `onnxruntime` encoder/decoder pair, click-a-point segmentation, contrasted with notebook 22's unsupervised Watershed on the same `coins.jpg` |
+| <img src="assets/thumbnails/nb38.jpg" width="120"> | 38 | Monocular Depth Estimation vs. Classical Stereo | Depth Anything V2 Small (single photo, `onnxruntime`) graded against the same real ground truth (`aloeGT.png`) notebook 32 used for `StereoSGBM` — surprisingly close on this scene |
+| <img src="assets/thumbnails/nb39.jpg" width="120"> | 39 | GPU Acceleration with cv2.UMat | The Transparent API's automatic OpenCL dispatch, honestly benchmarked — single op vs. chained pipeline, across image sizes, on real hardware |
+| <img src="assets/thumbnails/nb40.jpg" width="120"> | 40 | Modern Learned Feature Matching: DISK + LightGlue | `onnxruntime`, a fused DISK+LightGlue ONNX pipeline, localizing the exact same object as notebook 27's classical SIFT/RANSAC on the same photo pair |
+| <img src="assets/thumbnails/nb41.jpg" width="120"> | 41 | Superpixel Segmentation: SLIC, SEEDS & LSC | `cv2.ximgproc`, no external model — tested directly against notebook 22's exact tuned Watershed pipeline on the same `coins.jpg`, including a real case where Watershed's threshold fails and superpixels don't |
+| <img src="assets/thumbnails/nb42.jpg" width="120"> | 42 | Disparity Refinement: WLS & Guided Filters | `cv2.ximgproc`'s edge-aware filters densify notebook 32's raw `StereoSGBM` holes, graded against the same `aloeGT.png` ground truth for both density and accuracy |
+|  | 43 | Robust Estimation: RANSAC vs. USAC/MAGSAC++ | Same `cv2.findHomography` call, one argument changed — rerun on notebook 27's exact SIFT matches, identical accuracy at 20-70x less runtime on noisy data |
+| <img src="assets/thumbnails/nb44.jpg" width="120"> | 44 | G-API Graph Pipelining vs. Naive vs. UMat | `cv2.gapi`'s graph-fused execution, benchmarked the same honest way as notebook 39 — a genuinely different mechanism from `UMat`, and on this pipeline/hardware, not the faster one |
+| <img src="assets/thumbnails/nb45.jpg" width="120"> | 45 | Automatic White Balance with cv2.xphoto | `GrayworldWB` vs. `SimpleWB` correcting a known synthetic color cast on notebook 3's `castara.jpeg`, scored against real ground truth — a real assumption failure, and a numeric-vs-visual surprise echoing notebook 35 |
 
-Notebooks 27-43 were added after the original 26-notebook rewrite, filling
+Notebooks 27-45 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
 inpainting, super-resolution, text detection, promptable segmentation,
 monocular depth, GPU acceleration, modern learned feature matching,
-superpixel segmentation, disparity refinement, robust estimation) — see the
-"Develop" section for the scripts that build them.
+superpixel segmentation, disparity refinement, robust estimation, graph
+pipelining, white balance) — see the "Develop" section for the scripts that
+build them.
 
 **Notebook 40 uses `onnxruntime`, not `cv2.ALIKED`/`cv2.LightGlueMatcher`.**
 OpenCV 5.x's Python API for those classes exists in
@@ -131,7 +141,7 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33, 35-43) stays on the original
+Every other notebook in this repo (1-33, 35-45) stays on the original
 `.venv` / `requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
@@ -363,6 +373,12 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb4
 
 # Rebuild + re-execute notebook 43 (RANSAC vs. USAC/MAGSAC++)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb43.py
+
+# Rebuild + re-execute notebook 44 (G-API graph pipelining)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb44.py
+
+# Rebuild + re-execute notebook 45 (automatic white balance)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb45.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
