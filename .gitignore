@@ -16,3 +16,8 @@ car_tracking_mean_shift.*
 dense_optical_flow_walking.*
 optical_flow_walking.*
 walking_output*
+
+# SAM2 encoder exceeds GitHub's 100MB per-file limit — notebook 46 downloads
+# these itself on first run instead (see its assets note / README).
+assets/models/sam2_encoder.onnx
+assets/models/sam2_decoder.onnx

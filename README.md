@@ -1,12 +1,12 @@
 # Image-Processing-Techniques
 Image Processing using OpenCV
 
-[![Notebooks](https://img.shields.io/badge/notebooks-45-blue)](#whats-here)
+[![Notebooks](https://img.shields.io/badge/notebooks-46-blue)](#whats-here)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](requirements.txt)
 [![OpenCV](https://img.shields.io/badge/opencv-4.10%20%7C%205.0-5C3EE8)](#opencv-5x-notebooks)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A 45-notebook walkthrough of computer vision with OpenCV — from loading your
+A 46-notebook walkthrough of computer vision with OpenCV — from loading your
 first image through classical CV (background subtraction, optical flow,
 object tracking) to modern DNN-based techniques (YOLOX, LaMa, MobileSAM,
 DISK + LightGlue) run via `cv2.dnn` and `onnxruntime`. Every notebook runs
@@ -55,7 +55,7 @@ players, no local GUI or download step required.
 | <img src="assets/thumbnails/nb33.jpg" width="120"> | 33 | DNN Object Detection with YOLOX | `cv2.dnn` + ONNX, letterbox/grid-decode/NMS pipeline, compared against notebook 17's background subtraction |
 | <img src="assets/thumbnails/nb34.jpg" width="120"> | 34 | Image Inpainting: Classical vs. LaMa (DNN) | `cv2.inpaint` vs. LaMa, a generative DNN inpainter built into OpenCV 5 — **needs the separate `.venv5x` environment, see below** |
 | <img src="assets/thumbnails/nb35.jpg" width="120"> | 35 | Image Super-Resolution: Classical vs. Learned | `cv2.dnn_superres` (ESPCN, FSRCNN) vs. bicubic, cross-checked with notebook 20's MSE/SSIM plus PSNR — where the numbers and the eye test disagree, and why |
-| <img src="assets/thumbnails/nb36.jpg" width="120"> | 36 | Text Detection with DB | `cv2.dnn_TextDetectionModel_DB`, upright vs. rotated text, straightening a detected line with notebook 18's perspective-warp technique |
+| <img src="assets/thumbnails/nb36.jpg" width="120"> | 36 | Text Detection & Recognition with DB + CRNN | `cv2.dnn_TextDetectionModel_DB`, upright vs. rotated text, straightening a detected line with notebook 18's perspective-warp technique, then closing the loop with a CRNN/CTC recognizer that actually reads the words |
 | <img src="assets/thumbnails/nb37.jpg" width="120"> | 37 | Promptable Segmentation with MobileSAM | `onnxruntime` encoder/decoder pair, click-a-point segmentation, contrasted with notebook 22's unsupervised Watershed on the same `coins.jpg` |
 | <img src="assets/thumbnails/nb38.jpg" width="120"> | 38 | Monocular Depth Estimation vs. Classical Stereo | Depth Anything V2 Small (single photo, `onnxruntime`) graded against the same real ground truth (`aloeGT.png`) notebook 32 used for `StereoSGBM` — surprisingly close on this scene |
 | <img src="assets/thumbnails/nb39.jpg" width="120"> | 39 | GPU Acceleration with cv2.UMat | The Transparent API's automatic OpenCL dispatch, honestly benchmarked — single op vs. chained pipeline, across image sizes, on real hardware |
@@ -65,15 +65,16 @@ players, no local GUI or download step required.
 |  | 43 | Robust Estimation: RANSAC vs. USAC/MAGSAC++ | Same `cv2.findHomography` call, one argument changed — rerun on notebook 27's exact SIFT matches, identical accuracy at 20-70x less runtime on noisy data |
 | <img src="assets/thumbnails/nb44.jpg" width="120"> | 44 | G-API Graph Pipelining vs. Naive vs. UMat | `cv2.gapi`'s graph-fused execution, benchmarked the same honest way as notebook 39 — a genuinely different mechanism from `UMat`, and on this pipeline/hardware, not the faster one |
 | <img src="assets/thumbnails/nb45.jpg" width="120"> | 45 | Automatic White Balance with cv2.xphoto | `GrayworldWB` vs. `SimpleWB` correcting a known synthetic color cast on notebook 3's `castara.jpeg`, scored against real ground truth — a real assumption failure, and a numeric-vs-visual surprise echoing notebook 35 |
+| <img src="assets/thumbnails/nb46.jpg" width="120"> | 46 | SAM2 vs. MobileSAM: Promptable Segmentation Shootout | Meta's SAM2.1-tiny (`onnxruntime`) vs. notebook 37's MobileSAM, same `coins.jpg`, same three clicks — cross-checked mask agreement (no ground truth needed) against real measured cost, model size and encoder speed |
 
-Notebooks 27-45 were added after the original 26-notebook rewrite, filling
+Notebooks 27-46 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
-inpainting, super-resolution, text detection, promptable segmentation,
-monocular depth, GPU acceleration, modern learned feature matching,
-superpixel segmentation, disparity refinement, robust estimation, graph
-pipelining, white balance) — see the "Develop" section for the scripts that
-build them.
+inpainting, super-resolution, text detection and recognition, promptable
+segmentation, monocular depth, GPU acceleration, modern learned feature
+matching, superpixel segmentation, disparity refinement, robust estimation,
+graph pipelining, white balance, next-generation promptable segmentation) —
+see the "Develop" section for the scripts that build them.
 
 **Notebook 40 uses `onnxruntime`, not `cv2.ALIKED`/`cv2.LightGlueMatcher`.**
 OpenCV 5.x's Python API for those classes exists in
@@ -122,7 +123,11 @@ jupyter notebook
 
 That's it — `assets/images/`, `assets/videos/`, `assets/haarcascades/`, and
 `assets/models/` ship with the repo, so nothing needs to be downloaded
-before running a notebook top to bottom.
+before running a notebook top to bottom — **with one exception**: notebook
+46's SAM2 encoder is 104MB, over GitHub's 100MB hard per-file limit, so it
+isn't committed here. The notebook's own first code cell fetches it (and its
+decoder) automatically on first run and skips the download on every run
+after — see that notebook's assets note.
 
 ### OpenCV 5.x notebooks
 
@@ -141,7 +146,7 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33, 35-45) stays on the original
+Every other notebook in this repo (1-33, 35-46) stays on the original
 `.venv` / `requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
@@ -213,6 +218,11 @@ scattered loose at the repo root:
   scriptably fetchable nor as clearly licensed as everything else this repo
   bundles. `assets/images/imageTextN.png` / `imageTextR.png` (real book-page
   text, upright and rotated) are OpenCV's own official samples too.
+  `assets/models/text_recognition_crnn_en_2021sep.onnx` (also notebook 36) is
+  the officially-paired CRNN recognizer from the same
+  [opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/text_recognition_crnn)
+  entry (Apache 2.0) — closes the detect→recognize loop the detector alone
+  couldn't.
   `assets/models/inpainting_lama_2025jan.onnx` (notebook 34) is LaMa, from
   [opencv/inpainting_lama](https://huggingface.co/opencv/inpainting_lama) on
   Hugging Face (Apache 2.0, originally [advimman/lama](https://github.com/advimman/lama)).
@@ -248,6 +258,19 @@ scattered loose at the repo root:
   it supports, SuperPoint, which is restrictive and wasn't used here). See
   that notebook for why this bypasses OpenCV 5's still-unshipped native
   `cv2.ALIKED`/`cv2.LightGlueMatcher` classes.
+  `assets/models/sam2_encoder.onnx` / `sam2_decoder.onnx` (notebook 46) are
+  Meta's SAM2.1 **tiny** backbone, exported with
+  [samexporter](https://github.com/vietanhdev/samexporter) and mirrored
+  byte-for-byte at
+  [akiyamanx/sam2.1-hiera-tiny-onnx](https://huggingface.co/akiyamanx/sam2.1-hiera-tiny-onnx)
+  (Apache 2.0), traced to the official
+  [facebookresearch/sam2](https://github.com/facebookresearch/sam2)
+  checkpoints (Apache 2.0, license unchanged through the export). **At
+  ~120MB combined — and the encoder alone over GitHub's 100MB hard per-file
+  limit — this is the one asset pair in the repo that isn't committed to
+  git.** Notebook 46's own first cell downloads both files into
+  `assets/models/` on first run and skips the download on every run after —
+  see `.gitignore` and that notebook's assets note.
 - **Procedurally generated** — where no suitable real sample existed:
   the contour-sorting shape set (`4star`, `bunchofshapes`, `hand`, `house`,
   `shapestomatch`), the Hough-circle scene, and the skewed "scanned
@@ -379,6 +402,9 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb4
 
 # Rebuild + re-execute notebook 45 (automatic white balance)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb45.py
+
+# Rebuild + re-execute notebook 46 (SAM2 vs. MobileSAM)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb46.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
