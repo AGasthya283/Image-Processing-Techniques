@@ -1,12 +1,12 @@
 # Image-Processing-Techniques
 Image Processing using OpenCV
 
-[![Notebooks](https://img.shields.io/badge/notebooks-46-blue)](#whats-here)
+[![Notebooks](https://img.shields.io/badge/notebooks-48-blue)](#whats-here)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](requirements.txt)
 [![OpenCV](https://img.shields.io/badge/opencv-4.10%20%7C%205.0-5C3EE8)](#opencv-5x-notebooks)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A 46-notebook walkthrough of computer vision with OpenCV — from loading your
+A 48-notebook walkthrough of computer vision with OpenCV — from loading your
 first image through classical CV (background subtraction, optical flow,
 object tracking) to modern DNN-based techniques (YOLOX, LaMa, MobileSAM,
 DISK + LightGlue) run via `cv2.dnn` and `onnxruntime`. Every notebook runs
@@ -66,15 +66,18 @@ players, no local GUI or download step required.
 | <img src="assets/thumbnails/nb44.jpg" width="120"> | 44 | G-API Graph Pipelining vs. Naive vs. UMat | `cv2.gapi`'s graph-fused execution, benchmarked the same honest way as notebook 39 — a genuinely different mechanism from `UMat`, and on this pipeline/hardware, not the faster one |
 | <img src="assets/thumbnails/nb45.jpg" width="120"> | 45 | Automatic White Balance with cv2.xphoto | `GrayworldWB` vs. `SimpleWB` correcting a known synthetic color cast on notebook 3's `castara.jpeg`, scored against real ground truth — a real assumption failure, and a numeric-vs-visual surprise echoing notebook 35 |
 | <img src="assets/thumbnails/nb46.jpg" width="120"> | 46 | SAM2 vs. MobileSAM: Promptable Segmentation Shootout | Meta's SAM2.1-tiny (`onnxruntime`) vs. notebook 37's MobileSAM, same `coins.jpg`, same three clicks — cross-checked mask agreement (no ground truth needed) against real measured cost, model size and encoder speed |
+| <img src="assets/thumbnails/nb47.jpg" width="120"> | 47 | Face Recognition with SFace | `cv2.FaceRecognizerSF`, chained onto notebook 30's YuNet detections — full pairwise cosine-similarity matrix across real geometric/photometric variants of the same face, checked against OpenCV's own published match threshold |
+| <img src="assets/thumbnails/nb48.jpg" width="120"> | 48 | Saliency Detection: Static Saliency vs. BING Objectness | `cv2.saliency` — per-pixel Spectral Residual / Fine-Grained heatmaps vs. BING's ranked, class-agnostic object-proposal boxes, same module, two different jobs |
 
-Notebooks 27-46 were added after the original 26-notebook rewrite, filling
+Notebooks 27-48 were added after the original 26-notebook rewrite, filling
 gaps the series didn't cover yet (feature matching, stitching, 1D/2D code
 detection, DNN-based detection, camera calibration, stereo vision, generative
 inpainting, super-resolution, text detection and recognition, promptable
 segmentation, monocular depth, GPU acceleration, modern learned feature
 matching, superpixel segmentation, disparity refinement, robust estimation,
-graph pipelining, white balance, next-generation promptable segmentation) —
-see the "Develop" section for the scripts that build them.
+graph pipelining, white balance, next-generation promptable segmentation,
+face recognition, saliency detection) — see the "Develop" section for the
+scripts that build them.
 
 **Notebook 40 uses `onnxruntime`, not `cv2.ALIKED`/`cv2.LightGlueMatcher`.**
 OpenCV 5.x's Python API for those classes exists in
@@ -146,7 +149,7 @@ python3 -m venv .venv5x
 .venv5x/bin/jupyter notebook   # open notebook 34, select the "OpenCV 5.x" kernel
 ```
 
-Every other notebook in this repo (1-33, 35-46) stays on the original
+Every other notebook in this repo (1-33, 35-48) stays on the original
 `.venv` / `requirements.txt` — only open notebook 34 with `.venv5x`.
 
 `requirements.txt` pins `opencv-contrib-python-headless==4.10.0.84` — the
@@ -271,6 +274,21 @@ scattered loose at the repo root:
   git.** Notebook 46's own first cell downloads both files into
   `assets/models/` on first run and skips the download on every run after —
   see `.gitignore` and that notebook's assets note.
+  `assets/models/face_recognition_sface_2021dec.onnx` (notebook 47) is SFace,
+  also from
+  [opencv/opencv_zoo](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface)
+  (Apache 2.0, own `LICENSE` file in that directory, confirmed directly
+  rather than assumed from YuNet's neighboring MIT license — Zoo licenses
+  vary per model) — paired with notebook 30's YuNet detector, ~37MB, fetched
+  via GitHub's LFS media endpoint since the Zoo repo stores its models
+  through Git LFS.
+  `assets/models/ObjectnessTrainedModel/` (notebook 48) is BING's trained
+  statistics directory — nine `.yml.gz` files, ~3.4KB total — mirrored from
+  [opencv/opencv_contrib](https://github.com/opencv/opencv_contrib/tree/master/modules/saliency/samples/ObjectnessTrainedModel)
+  itself (Apache 2.0, same license as the OpenCV build; no separate license
+  file for this sample directory, and no license concern at all for the
+  static-saliency algorithms notebook 48 also covers, since neither needs
+  any external file).
 - **Procedurally generated** — where no suitable real sample existed:
   the contour-sorting shape set (`4star`, `bunchofshapes`, `hand`, `house`,
   `shapestomatch`), the Hough-circle scene, and the skewed "scanned
@@ -405,6 +423,12 @@ JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb4
 
 # Rebuild + re-execute notebook 46 (SAM2 vs. MobileSAM)
 JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb46.py
+
+# Rebuild + re-execute notebook 47 (SFace face recognition)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb47.py
+
+# Rebuild + re-execute notebook 48 (saliency detection)
+JUPYTER_DATA_DIR="$(pwd)/.venv/share/jupyter" .venv/bin/python scripts/build_nb48.py
 ```
 
 `scripts/build_notebooks.py` is idempotent only against a freshly-checked-out
